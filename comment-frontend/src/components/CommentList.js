@@ -74,6 +74,26 @@ const CommentList = ({ comments }) => {
                                     __html: DOMPurify.sanitize(comment.text),
                                 }}
                             ></div>
+
+                            {/* Если комментарий содержит файл изображения, отобразите его */}
+                            {comment.image && (
+                                <div className={styles.commentImage}>
+                                    <img
+                                        src={comment.image}
+                                        alt="Comment Attachment"
+                                        className={styles.image}
+                                    />
+                                </div>
+                            )}
+
+                            {/* Если комментарий содержит текстовый файл, добавьте ссылку для скачивания */}
+                            {comment.file && (
+                                <div className={styles.commentFile}>
+                                    <a href={comment.file} download>
+                                        Download Attached File
+                                    </a>
+                                </div>
+                            )}
                         </div>
                     ))
                 )}
