@@ -1,48 +1,115 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import DOMPurify from 'dompurify'; // Защита от XSS
 import styles from './CommentList.module.css'; // Подключение стилей
+import CommentForm from './CommentForm';
 
-const CommentList = ({ comments }) => {
-    const [sortField, setSortField] = useState('created_at'); // Поле сортировки
-    const [sortOrder, setSortOrder] = useState('desc'); // Порядок сортировки
-    const [currentPage, setCurrentPage] = useState(1); // Текущая страница
-    const commentsPerPage = 25; // Количество комментариев на странице
+const CommentList = ({comments,setSortField,setSortOrder,sortOrder}) => {
+    const [expandedComment, setExpandedComment] = useState(null); // Состояние для раскрытого комментария
+    const [activeReplyForm, setActiveReplyForm] = useState(null);
+    const [expandedReplies, setExpandedReplies] = useState({});
+    const [isLoading, setIsLoading] = useState(true);
+    
 
-    // Сортировка комментариев
-    const sortComments = (comments) => {
-        const sortedComments = [...comments];
-        sortedComments.sort((a, b) => {
-            const fieldA = a[sortField]?.toLowerCase?.() || a[sortField];
-            const fieldB = b[sortField]?.toLowerCase?.() || b[sortField];
 
-            if (sortOrder === 'asc') {
-                return fieldA > fieldB ? 1 : -1;
-            } else {
-                return fieldA < fieldB ? 1 : -1;
-            }
-        });
-        return sortedComments;
-    };
+    useEffect(() => {
+        setIsLoading(false); // Симулируем завершение загрузки
+    }, [comments]);
 
-    // Фильтрация только заглавных комментариев
-    const topLevelComments = comments.filter((comment) => !comment.parent);
 
-    // Пагинация
-    const indexOfLastComment = currentPage * commentsPerPage;
-    const indexOfFirstComment = indexOfLastComment - commentsPerPage;
-    const currentComments = sortComments(topLevelComments).slice(
-        indexOfFirstComment,
-        indexOfLastComment
-    );
-
-    const handlePageChange = (page) => {
-        setCurrentPage(page);
-    };
 
     const handleSort = (field) => {
         setSortField(field);
-        setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc');
+        setSortOrder(sortOrder === "desc" ? "asc" : "desc");
     };
+
+    
+    const toggleReplies = (commentId) => {
+        setExpandedReplies((prev) => ({
+            ...prev,
+            [commentId]: !prev[commentId],
+        }));
+    };
+    
+    
+    const renderComments = (comments, depth = 0) => {
+        return comments.map((comment) => (
+            <div
+                key={comment.id}
+                className={`${styles.comment} ${
+                    expandedComment === comment.id ? styles.active : ""
+                }`} 
+                style={{ marginLeft: `${depth * 20}px` }}
+            >
+                <div className={styles.commentHeader}>
+                    <strong>{comment.username}</strong>
+                    <span className={styles.commentDate}>
+                        {new Date(comment.created_at).toLocaleString()}
+                    </span>
+                </div>
+                <div
+                    className={`${styles.commentBody} ${
+                        expandedComment === comment.id ? styles.expanded : ""
+                    }`}
+                    dangerouslySetInnerHTML={{
+                        __html: DOMPurify.sanitize(comment.text),
+                    }}
+                    onClick={() =>
+                        setExpandedComment(expandedComment === comment.id ? null : comment.id)
+                    }
+                ></div>
+    
+                {comment.image && (
+                    <div className={styles.commentImage}>
+                        <img src={comment.image} alt="Attachment" className={styles.image} />
+                    </div>
+                )}
+                {comment.file && (
+                    <div className={styles.commentFile}>
+                        <a href={comment.file} download>
+                            Download File
+                        </a>
+                    </div>
+                )}
+                
+                {/* Кнопка для отображения/скрытия ответов */}
+                {comment.replies && comment.replies.length > 0 && (
+                    <button
+                        //className={styles.toggleRepliesButton}
+                        className={styles.button} 
+                            
+                        onClick={() => toggleReplies(comment.id)}
+                    >
+                        {expandedReplies[comment.id] ? "Hide Replies" : "Show Replies"}
+                    </button>
+                )}
+                
+                <div
+                    className={`${styles.replies} ${
+                        expandedReplies[comment.id] ? styles.expanded : ""
+                    }`}
+                >
+                    {expandedReplies[comment.id] &&
+                    comment.replies &&
+                    renderComments(comment.replies, depth + 1)}
+                </div>
+
+
+                {/* Кнопка "Reply" и форма для добавления ответа */}
+                <button
+                    className={styles.replyButton}
+                    onClick={() =>
+                        setActiveReplyForm(activeReplyForm === comment.id ? null : comment.id)
+                    }
+                >
+                    {activeReplyForm === comment.id ? "Cancel" : "Reply"}
+                </button>
+                {activeReplyForm === comment.id && (
+                    <CommentForm parentId={comment.id} />
+                )}
+            </div>
+        ));
+    };
+    
 
     return (
         <div className={styles.container}>
@@ -57,64 +124,15 @@ const CommentList = ({ comments }) => {
 
             {/* Список комментариев */}
             <div className={styles.commentList}>
-                {currentComments.length === 0 ? (
-                    <p>No comments available.</p>
+                
+                {isLoading ? (
+                    <div className={styles.loader}></div>
                 ) : (
-                    currentComments.map((comment) => (
-                        <div key={comment.id} className={styles.comment}>
-                            <div className={styles.commentHeader}>
-                                <strong>{comment.username}</strong>
-                                <span className={styles.commentDate}>
-                                    {new Date(comment.created_at).toLocaleString()}
-                                </span>
-                            </div>
-                            <div
-                                className={styles.commentBody}
-                                dangerouslySetInnerHTML={{
-                                    __html: DOMPurify.sanitize(comment.text),
-                                }}
-                            ></div>
-
-                            {/* Если комментарий содержит файл изображения, отобразите его */}
-                            {comment.image && (
-                                <div className={styles.commentImage}>
-                                    <img
-                                        src={comment.image}
-                                        alt="Comment Attachment"
-                                        className={styles.image}
-                                    />
-                                </div>
-                            )}
-
-                            {/* Если комментарий содержит текстовый файл, добавьте ссылку для скачивания */}
-                            {comment.file && (
-                                <div className={styles.commentFile}>
-                                    <a href={comment.file} download>
-                                        Download Attached File
-                                    </a>
-                                </div>
-                            )}
-                        </div>
-                    ))
+                    renderComments(comments)
                 )}
-            </div>
 
-            {/* Пагинация */}
-            <div className={styles.pagination}>
-                <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                >
-                    Previous
-                </button>
-                <span>Page {currentPage}</span>
-                <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={indexOfLastComment >= topLevelComments.length}
-                >
-                    Next
-                </button>
             </div>
+            
         </div>
     );
 };
