@@ -7,6 +7,62 @@
   pointer-events: none;
 }
 
+.app-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.app-title {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.form-toggle-container {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.toggle-form-button {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.toggle-form-button:hover {
+  background-color: #0056b3;
+}
+
+.loading-text {
+  text-align: center;
+  color: #666;
+  font-size: 1rem;
+}
+
+.load-more-button {
+  display: block;
+  margin: 20px auto;
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.load-more-button:hover {
+  background-color: #218838;
+}
+
+
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
@@ -35,4 +91,11 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
 }

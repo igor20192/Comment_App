@@ -1,0 +1,172 @@
+/* Основной контейнер формы */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 2rem;
+    max-width: 500px;
+    margin: 1rem auto;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Стили для полей ввода */
+.input,
+.textarea,
+.fileInput {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.input:focus,
+.textarea:focus,
+.fileInput:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+/* Стили для кнопки */
+.button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.button:hover {
+    background-color: #0056b3;
+}
+
+/* Секция капчи */
+.captchaContainer {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.captchaImage {
+    max-height: 50px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Ошибки */
+.errorMessage {
+    color: red;
+    font-size: 0.9rem;
+}
+
+/* Подписи для загрузки файлов */
+.fileLabel {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+/* --- Адаптивность --- */
+
+/* Для маленьких экранов (до 600px) */
+@media (max-width: 600px) {
+    .form {
+        padding: 1rem;
+        box-shadow: none;
+    }
+
+    .captchaContainer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .captchaImage {
+        max-width: 100%;
+        max-height: none;
+    }
+
+    .button {
+        font-size: 0.9rem;
+        padding: 0.6rem;
+    }
+}
+
+/* Для планшетов (601px - 900px) */
+@media (min-width: 601px) and (max-width: 900px) {
+    .form {
+        max-width: 400px;
+    }
+
+    .input,
+    .textarea {
+        font-size: 0.95rem;
+        padding: 0.7rem;
+    }
+
+    .button {
+        font-size: 0.95rem;
+    }
+}
+
+/* Для больших экранов (от 901px) */
+@media (min-width: 901px) {
+    .form {
+        max-width: 600px;
+    }
+
+    .input,
+    .textarea {
+        font-size: 1.1rem;
+        padding: 1rem;
+    }
+
+    .button {
+        font-size: 1.1rem;
+        padding: 1rem;
+    }
+}
+
+.toolbar {
+    margin-bottom: 10px;
+}
+.toolbar button {
+    margin-right: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.tagButtons button {
+    margin-right: 5px;
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.tagButtons button:hover {
+    background-color: #0056b3;
+}
+
+.preview {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    font-family: Arial, sans-serif;
+    word-wrap: break-word;
+}
+
+.preview h3 {
+    margin-top: 0;
+    font-size: 18px;
+    color: #333;
+}
+
