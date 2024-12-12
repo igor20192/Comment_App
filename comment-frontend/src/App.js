@@ -2,109 +2,138 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import CommentForm from './components/CommentForm';
 import CommentList from './components/CommentList';
+import './App.css'; // Подключаем стили
 
 const App = () => {
     const [comments, setComments] = useState([]);
-    const [nextPage, setNextPage] = useState(null);
-    const [loading, setLoading] = useState(false); // Состояние для отслеживания загрузки
+    const [loading, setLoading] = useState(false);
+    const [sortField, setSortField] = useState('created_at');// Поле сортировки
+    const [sortOrder, setSortOrder] = useState('desc');
+    const [isFormVisible, setIsFormVisible] = useState(false); // Состояние видимости формы
+    const [currentPage, setCurrentPage] = useState(1); // Текущая страница
+    const [nextPage, setNextPage] = useState(null); // Ссылка на следующую страницу
+    const [prevPage, setPrevPage] = useState(null); // Ссылка на предыдущую страницу
 
-    // Функция для загрузки комментариев
-    const fetchComments = async (url = 'http://localhost:8000/api/comments/') => {
-        setLoading(true); // Начинаем загрузку
+    // Загрузка комментариев
+    const fetchComments = async (page,url = `http://localhost:8000/api/comments/`) => {
+        setLoading(true);
         try {
-            const response = await axios.get(url);
-            setComments((prevComments) => {
-                const newComments = response.data.results.filter(
-                    newComment => !prevComments.some(comment => comment.id === newComment.id) // Добавляем только новые комментарии
-                );
-                return [...prevComments, ...newComments];
+            const response = await axios.get(url,{
+                params: {
+                    page: page,
+                    ordering: `${sortOrder === "asc" ? "" : "-"}${sortField}`,
+                },
             });
-            setNextPage(response.data.next); // Устанавливаем ссылку на следующую страницу
+            // setComments((prevComments) => {
+            //     const newComments = response.data.results.filter(
+            //         (newComment) => !prevComments.some((comment) => comment.id === newComment.id)
+            //     );
+            //     return [...prevComments, ...newComments];
+            // });
+            setComments(response.data.results);
+            setNextPage(response.data.next);
+            setPrevPage(response.data.previous)
         } catch (error) {
             console.error('Error fetching comments:', error);
         } finally {
-            setLoading(false); // Останавливаем загрузку
+            setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchComments(); // Загружаем комментарии при монтировании компонента
-    }, []);
+        fetchComments(currentPage);
+    }, [currentPage,sortField,sortOrder]);
 
-    // WebSocket для получения новых комментариев в реальном времени
-    
+    const handlePageChange = (direction) => {
+        if (direction === "next" && nextPage) {
+            setCurrentPage((prev) => prev + 1);
+        } else if (direction === "prev" && prevPage) {
+            setCurrentPage((prev) => prev - 1);
+        }
+    };
+
+    // WebSocket для реального времени
     const addReplyToTree = (comments, newReply) => {
-        return comments.map(comment => {
+        return comments.map((comment) => {
             if (comment.id === newReply.parent) {
-                // Если нашли родителя, добавляем подкомментарий
                 return {
                     ...comment,
                     replies: [...(comment.replies || []), newReply],
                 };
             }
-    
-            // Если не нашли, проверяем вложенные комментарии
+
             if (comment.replies && comment.replies.length > 0) {
                 return {
                     ...comment,
                     replies: addReplyToTree(comment.replies, newReply),
                 };
             }
-    
+
             return comment;
         });
     };
-    
-    
+
     useEffect(() => {
         const ws = new WebSocket('ws://localhost:8000/ws/comments/');
         ws.onmessage = (event) => {
             const newComment = JSON.parse(event.data);
             console.log('New comment received:', newComment);
-    
+
             setComments((prevComments) => {
                 if (newComment.parent) {
-                    // Обновляем дерево комментариев рекурсивно
                     return addReplyToTree(prevComments, newComment);
                 } else {
-                    // Если это обычный комментарий, добавляем его в начало списка
-                    if (prevComments.some(comment => comment.id === newComment.id)) {
-                        return prevComments; // Не добавляем, если комментарий уже существует
+                    if (prevComments.some((comment) => comment.id === newComment.id)) {
+                        return prevComments;
                     }
                     return [newComment, ...prevComments];
                 }
             });
         };
-    
+
         ws.onerror = (error) => {
             console.error('WebSocket Error:', error);
         };
-    
+
         ws.onclose = () => {
             console.log('WebSocket connection closed');
         };
-    
-        return () => ws.close(); // Закрываем WebSocket соединение при размонтировании компонента
+
+        return () => ws.close();
     }, []);
-    
 
-
-    // Функция для загрузки следующей страницы комментариев
     const loadMoreComments = () => {
         if (nextPage) {
             fetchComments(nextPage);
         }
     };
-    
+
     return (
-        <div>
-            <h1>Comments</h1>
-            <CommentForm />
-            <CommentList comments={comments}  fetchComments={fetchComments}/>
-            {loading && <p>Loading...</p>} {/* Показываем текст "Loading..." при загрузке */}
-            {nextPage && !loading && (
-                <button onClick={loadMoreComments}>Load More</button> // Кнопка для подгрузки следующей страницы
-            )}
+        <div className="app-container">
+            <h1 className="app-title">Comments</h1>
+
+            <div className="form-toggle-container">
+                <button
+                    className="toggle-form-button"
+                    onClick={() => setIsFormVisible(!isFormVisible)}
+                >
+                    {isFormVisible ? 'Hide Comment Form' : 'Add a Comment'}
+                </button>
+            </div>
+
+            {isFormVisible && <CommentForm />}
+
+            <CommentList comments={comments} setSortField = {setSortField} setSortOrder = {setSortOrder} sortOrder = {sortOrder}/>
+
+            <div className=".pagination">
+                <button onClick={() => handlePageChange("prev")} disabled={!prevPage}>
+                    Previous
+                </button>
+                <span>Page {currentPage}</span>
+                <button onClick={() => handlePageChange("next")} disabled={!nextPage}>
+                    Next
+                </button>
+            </div>
         </div>
     );
 };
