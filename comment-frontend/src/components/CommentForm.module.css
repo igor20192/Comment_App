@@ -62,8 +62,14 @@
 /* Ошибки */
 .errorMessage {
     color: red;
-    font-size: 0.9rem;
+    font-size: 14px;
+    margin-top: 10px;
+    background-color: #ffe6e6;
+    padding: 10px;
+    border: 1px solid red;
+    border-radius: 5px;
 }
+
 
 /* Подписи для загрузки файлов */
 .fileLabel {

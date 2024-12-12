@@ -35,16 +35,65 @@ const CommentForm = (parentId = null) => {
 
     const handleChange = (e) => {
         const { name, value, files } = e.target;
-        if (name === "image" || name === "file") {
-            setFormData({ ...formData, [name]: files[0] });
+    
+        if (name === "image") {
+            const file = files[0];
+            if (file) {
+                // Проверка формата файла
+                const validFormats = ["image/jpeg", "image/png", "image/gif"];
+                if (!validFormats.includes(file.type)) {
+                    setFileError("Изображение должно быть в формате JPG, PNG или GIF.");
+                    return;
+                }
+                // Проверка размеров изображения
+                const img = new Image();
+                img.src = URL.createObjectURL(file);
+                img.onload = () => {
+                    const { width, height } = img;
+                    if (width > 320 || height > 240) {
+                        const canvas = document.createElement("canvas");
+                        const ctx = canvas.getContext("2d");
+    
+                        const scale = Math.min(320 / width, 240 / height);
+                        canvas.width = width * scale;
+                        canvas.height = height * scale;
+    
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        canvas.toBlob((blob) => {
+                            const resizedImage = new File([blob], file.name, { type: file.type });
+                            setFormData({ ...formData, image: resizedImage });
+                            setFileError("");
+                        }, file.type);
+                    } else {
+                        setFormData({ ...formData, image: file });
+                        setFileError("");
+                    }
+                };
+            }
+        } else if (name === "file") {
+            const file = files[0];
+            if (file) {
+                // Проверка формата файла
+                if (file.type !== "text/plain") {
+                    setFileError("Текстовый файл должен быть в формате TXT.");
+                    return;
+                }
+                // Проверка размера файла
+                if (file.size > 100 * 1024) {
+                    setFileError("Размер текстового файла не должен превышать 100 КБ.");
+                    return;
+                }
+                setFormData({ ...formData, file });
+                setFileError("");
+            }
         } else {
             setFormData({ ...formData, [name]: value });
             if (name === "text") {
-                // Обновление предварительного просмотра при изменении текста
                 setPreviewHTML(parseBBCode(value));
             }
         }
     };
+    
 
     const handleInsertTag = (tag) => {
         const textarea = document.querySelector(`textarea[name="text"]`);
@@ -121,8 +170,8 @@ const CommentForm = (parentId = null) => {
             if (error.response && error.response.status === 400) {
                 const errors = error.response.data;
                 let message = "Ошибка при отправке формы. Проверьте введённые данные.";
-                if (errors.captcha) {
-                    message = errors.captcha.join(", ");
+                if (errors.captcha_text) {
+                    message = "Введённый текст капчи неверный. Проверьте ввод и попробуйте снова.";
                 } else if (errors.username) {
                     message = errors.username.join(", ");
                 } else if (errors.email) {
@@ -202,6 +251,9 @@ const CommentForm = (parentId = null) => {
                     value={formData.captcha}
                     className={styles.input}
                 />
+                <small className={styles.hint}>
+                    Пожалуйста, введите текст с изображения. Учитывайте регистр символов.
+                </small>
             </div>
             <div>
                 <label htmlFor="image" className={styles.fileLabel}>Загрузите изображение:</label>
