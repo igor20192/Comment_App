@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "django_filters",
     "corsheaders",
     "channels",
     "captcha",
@@ -86,10 +87,25 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("redis", 6379)],  # for docker
+            "hosts": [("127.0.0.1", 6379)],  # for docker
         },
     },
 }
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379",
+        "TIMEOUT": 300,
+    }
+}
+
+
+REST_FRAMEWORK = {
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 25,
+}
+
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -156,3 +172,37 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+SITE_URL = config("SITE_URL")
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "file": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "filename": "debug.log",
+            "formatter": "verbose",
+        },
+        "console": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "your_app_name": {  # Replace with your app name
+            "handlers": ["file", "console"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+    },
+}
