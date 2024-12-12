@@ -10,9 +10,23 @@ class CommentAdmin(admin.ModelAdmin):
         "created_at",
     )
     list_filter = ("created_at",)
-    search_fields = ("user__username", "text__title", "content")
+    search_fields = ("username", "email", "text")
     readonly_fields = ("created_at",)
     fieldsets = (
-        (None, {"fields": ("username", "text", "content")}),
-        ("Timestamps", {"fields": ("created_at",), "classes": ("collapse",)}),
+        (
+            None,
+            {
+                "fields": (
+                    "username",
+                    "text",
+                    "email",
+                    "homepage",
+                    "image",
+                    "file",
+                    "parent",
+                    "created_at",
+                )
+            },
+        ),
+        ("Timestamps", {"fields": (), "classes": ("collapse",)}),
     )
