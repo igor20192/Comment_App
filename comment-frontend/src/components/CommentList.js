@@ -31,7 +31,7 @@ const CommentList = ({comments,setSortField,setSortOrder,sortOrder}) => {
     };
     
     
-    const renderComments = (comments, depth = 0) => {
+    const renderComments = (comments , depth = 0) => {
         return comments.map((comment) => (
             <div
                 key={comment.id}
@@ -112,29 +112,32 @@ const CommentList = ({comments,setSortField,setSortOrder,sortOrder}) => {
     
 
     return (
-        <div className={styles.container}>
-            <h1>Comments</h1>
+        
 
-            {/* Сортировка */}
-            <div className={styles.sortButtons}>
-                <button onClick={() => handleSort('username')}>Sort by Username</button>
-                <button onClick={() => handleSort('email')}>Sort by Email</button>
-                <button onClick={() => handleSort('created_at')}>Sort by Date</button>
-            </div>
+            <div className={styles.container}>
+                <h1>Comments</h1>
 
-            {/* Список комментариев */}
-            <div className={styles.commentList}>
+                {/* Сортировка */}
+                <div className={styles.sortButtons}>
+                    <button onClick={() => handleSort('username')}>Sort by Username</button>
+                    <button onClick={() => handleSort('email')}>Sort by Email</button>
+                    <button onClick={() => handleSort('created_at')}>Sort by Date</button>
+                </div>
+
+                {/* Список комментариев */}
+                <div className={styles.commentList}>
                 
-                {isLoading ? (
+                    {isLoading ? (
                     <div className={styles.loader}></div>
-                ) : (
-                    renderComments(comments)
-                )}
+                    ) : (
+                        renderComments(comments)
+                    )}
 
+                </div>
             </div>
             
-        </div>
     );
+
 };
 
 export default CommentList;
