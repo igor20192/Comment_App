@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import styles from "./CommentForm.module.css";
 import DOMPurify from "dompurify";
+import api from "./api";
 
 const CommentForm = (parentId = null) => {
     const [formData, setFormData] = useState({
@@ -148,7 +149,7 @@ const CommentForm = (parentId = null) => {
         if (formData.file) formDataToSend.append("file", formData.file);
 
         try {
-            await axios.post("http://localhost:8000/api/comments/", formDataToSend, {
+            await api.post("/comments/", formDataToSend, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },

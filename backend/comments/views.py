@@ -2,6 +2,7 @@ from hashlib import md5
 from django.conf import settings
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.permissions import IsAuthenticated
 from django.core.cache import cache
 from .models import Comment
 from .serializers import CommentSerializer
@@ -23,63 +24,8 @@ def get_captcha(request):
     return JsonResponse({"key": captcha_key, "image": captcha_image})
 
 
-# class CommentViewSet(ModelViewSet):
-#     queryset = Comment.objects.filter(parent__isnull=True).prefetch_related("replies")
-#     serializer_class = CommentSerializer
-#     filter_backends = [DjangoFilterBackend, OrderingFilter]
-#     ordering_fields = ["username", "email", "created_at"]
-#     ordering = ["-created_at"]
-#     filterset_fields = ["username", "email"]
-
-#     # Move cache timeout to settings
-#     CACHE_TIMEOUT = getattr(settings, "COMMENT_CACHE_TIMEOUT", 300)
-#     CACHE_KEY_PREFIX = "comment_list"
-
-#     def _generate_cache_key(self, request):
-#         """Generate a deterministic cache key based on request parameters"""
-#         page = request.query_params.get("page", "1")
-#         ordering = request.query_params.get("ordering", "-created_at")
-
-#         # Sort query params for consistent cache keys
-#         filtered_params = sorted(
-#             (k, v)
-#             for k, v in request.query_params.items()
-#             if k not in ["page", "ordering"]
-#         )
-
-#         # Create a unique string from the parameters
-#         param_string = f"page={page}:ordering={ordering}:" + "&".join(
-#             f"{k}={v}" for k, v in filtered_params
-#         )
-
-#         # Create an MD5 hash of the parameters for a shorter, fixed-length key
-#         param_hash = md5(param_string.encode()).hexdigest()
-
-#         return f"{self.CACHE_KEY_PREFIX}:{param_hash}"
-
-#     def list(self, request, *args, **kwargs):
-#         try:
-#             cache_key = self._generate_cache_key(request)
-#             cached_data = cache.get(cache_key)
-
-#             if cached_data:
-#                 return Response(cached_data)
-
-#             response = super().list(request, *args, **kwargs)
-
-#             # Only cache successful responses
-#             if response.status_code == 200:
-#                 cache.set(cache_key, response.data, timeout=self.CACHE_TIMEOUT)
-
-#             return response
-
-#         except Exception as e:
-#             # Log the error here if you have logging configured
-#             # Fall back to uncached response if caching fails
-#             return super().list(request, *args, **kwargs)
-
-
 class CommentViewSet(ModelViewSet):
+    permission_classes = [IsAuthenticated]
     queryset = Comment.objects.filter(parent__isnull=True).prefetch_related("replies")
     serializer_class = CommentSerializer
     filter_backends = [DjangoFilterBackend, OrderingFilter]

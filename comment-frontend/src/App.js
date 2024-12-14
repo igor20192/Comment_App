@@ -1,7 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import axios from 'axios';
+import {AuthProvider} from "./components/AuthContext";
+import ProtectedRoute from './components/ProtectedRoute';
+import Login from "./components/Login";
+import Register from './components/Register';
+import Home from './components/Home';
 import CommentForm from './components/CommentForm';
 import CommentList from './components/CommentList';
+import api from './components/api';
+import AuthContext from './components/AuthContext';
 import './App.css'; // Подключаем стили
 
 const App = () => {
@@ -13,23 +21,20 @@ const App = () => {
     const [currentPage, setCurrentPage] = useState(1); // Текущая страница
     const [nextPage, setNextPage] = useState(null); // Ссылка на следующую страницу
     const [prevPage, setPrevPage] = useState(null); // Ссылка на предыдущую страницу
+    const  isAuthenticated  = useContext(AuthContext);
+    
 
     // Загрузка комментариев
-    const fetchComments = async (page,url = `http://localhost:8000/api/comments/`) => {
+    const fetchComments = async (page,url = `/comments/`) => {
         setLoading(true);
         try {
-            const response = await axios.get(url,{
+            const response = await api.get(url,{
                 params: {
                     page: page,
                     ordering: `${sortOrder === "asc" ? "" : "-"}${sortField}`,
                 },
             });
-            // setComments((prevComments) => {
-            //     const newComments = response.data.results.filter(
-            //         (newComment) => !prevComments.some((comment) => comment.id === newComment.id)
-            //     );
-            //     return [...prevComments, ...newComments];
-            // });
+            
             setComments(response.data.results);
             setNextPage(response.data.next);
             setPrevPage(response.data.previous)
@@ -42,7 +47,7 @@ const App = () => {
 
     useEffect(() => {
         fetchComments(currentPage);
-    }, [currentPage,sortField,sortOrder]);
+    }, [currentPage,sortField,sortOrder,isAuthenticated]);
 
     const handlePageChange = (direction) => {
         if (direction === "next" && nextPage) {
@@ -107,34 +112,74 @@ const App = () => {
             fetchComments(nextPage);
         }
     };
-
+    
     return (
-        <div className="app-container">
-            <h1 className="app-title">Comments</h1>
+        <AuthProvider> {/* Обертка для AuthContext */}
+            <Router>
+                <Routes>
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route path="/" element={<Home />} />
+                    <Route path="/comments" element={
+                        <ProtectedRoute>
+                            <div className="app-container">
+                                <h1 className="app-title">Comments</h1>
 
-            <div className="form-toggle-container">
-                <button
-                    className="toggle-form-button"
-                    onClick={() => setIsFormVisible(!isFormVisible)}
-                >
-                    {isFormVisible ? 'Hide Comment Form' : 'Add a Comment'}
-                </button>
-            </div>
+                                <div className="form-toggle-container">
+                                    <button
+                                        className="toggle-form-button"
+                                        onClick={() => setIsFormVisible(!isFormVisible)}
+                                    >
+                                        {isFormVisible ? 'Hide Comment Form' : 'Add a Comment'}
+                                    </button>
+                                </div>
 
-            {isFormVisible && <CommentForm />}
+                                {isFormVisible && <CommentForm />}
 
-            <CommentList comments={comments} setSortField = {setSortField} setSortOrder = {setSortOrder} sortOrder = {sortOrder}/>
+                                <CommentList comments={comments} setSortField = {setSortField} setSortOrder = {setSortOrder} sortOrder = {sortOrder}/>
 
-            <div className=".pagination">
-                <button onClick={() => handlePageChange("prev")} disabled={!prevPage}>
-                    Previous
-                </button>
-                <span>Page {currentPage}</span>
-                <button onClick={() => handlePageChange("next")} disabled={!nextPage}>
-                    Next
-                </button>
-            </div>
-        </div>
+                                <div className=".pagination">
+                                    <button onClick={() => handlePageChange("prev")} disabled={!prevPage}>
+                                        Previous
+                                    </button>
+                                    <span>Page {currentPage}</span>
+                                    <button onClick={() => handlePageChange("next")} disabled={!nextPage}>
+                                        Next
+                                    </button>
+                                </div>
+                            </div>
+                        </ProtectedRoute>
+                    } />
+                </Routes>
+            </Router>
+        </AuthProvider>
+
+        // <div className="app-container">
+        //     <h1 className="app-title">Comments</h1>
+
+        //     <div className="form-toggle-container">
+        //         <button
+        //             className="toggle-form-button"
+        //             onClick={() => setIsFormVisible(!isFormVisible)}
+        //         >
+        //             {isFormVisible ? 'Hide Comment Form' : 'Add a Comment'}
+        //         </button>
+        //     </div>
+
+        //     {isFormVisible && <CommentForm />}
+
+        //     <CommentList comments={comments} setSortField = {setSortField} setSortOrder = {setSortOrder} sortOrder = {sortOrder}/>
+
+        //     <div className=".pagination">
+        //         <button onClick={() => handlePageChange("prev")} disabled={!prevPage}>
+        //             Previous
+        //         </button>
+        //         <span>Page {currentPage}</span>
+        //         <button onClick={() => handlePageChange("next")} disabled={!nextPage}>
+        //             Next
+        //         </button>
+        //     </div>
+        // </div>
     );
 };
 
