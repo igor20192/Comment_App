@@ -172,14 +172,14 @@
     color: #444;
 }
 
-.pagination {
+.paginationSort {
     display: flex;
     justify-content: center;
     align-items: center;
     margin-top: 20px;
 }
 
-.pagination button {
+.paginationSort button {
     margin: 0 5px;
     padding: 5px 10px;
     font-size: 14px;
@@ -522,3 +522,10 @@
     transform: scale(0.95);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+  }

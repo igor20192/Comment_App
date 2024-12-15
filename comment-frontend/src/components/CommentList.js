@@ -4,12 +4,12 @@ import styles from './CommentList.module.css'; // Подключение сти�
 import CommentForm from './CommentForm';
 import AuthContext from './AuthContext';
 
-const CommentList = ({ comments, setSortField, setSortOrder, sortOrder, onLogout }) => {
+const CommentList = () => {
     const [expandedComment, setExpandedComment] = useState(null); // Состояние для раскрытого комментария
     const [activeReplyForm, setActiveReplyForm] = useState(null);
     const [expandedReplies, setExpandedReplies] = useState({});
     const [isLoading, setIsLoading] = useState(true);
-    const {logout} = useContext(AuthContext);
+    const {logout, comments, currentPage, setCurrentPage, setSortField, setSortOrder, sortOrder, nextPage, prevPage, } = useContext(AuthContext);
 
     useEffect(() => {
         setIsLoading(false); // Симулируем завершение загрузки
@@ -25,6 +25,14 @@ const CommentList = ({ comments, setSortField, setSortOrder, sortOrder, onLogout
             ...prev,
             [commentId]: !prev[commentId],
         }));
+    };
+
+    const handlePageChange = (direction) => {
+        if (direction === "next" && nextPage) {
+            setCurrentPage((prev) => prev + 1);
+        } else if (direction === "prev" && prevPage) {
+            setCurrentPage((prev) => prev - 1);
+        }
     };
 
     const renderComments = (comments, depth = 0) => {
@@ -123,6 +131,17 @@ const CommentList = ({ comments, setSortField, setSortOrder, sortOrder, onLogout
             <div className={styles.commentList}>
                 {isLoading ? <div className={styles.loader}></div> : renderComments(comments)}
             </div>
+
+            <div className=".pagination">
+                <button onClick={() => handlePageChange("prev")} disabled={!prevPage}>
+                    Previous
+                </button>
+                    <span>Page {currentPage}</span>
+                <button onClick={() => handlePageChange("next")} disabled={!nextPage}>
+                    Next
+                </button>
+            </div>
+
         </div>
     );
 };
