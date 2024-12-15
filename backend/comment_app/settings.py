@@ -123,6 +123,8 @@ REST_FRAMEWORK = {
     # "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
 }
 
+CAPTCHA_CHALLENGE_FUNCT = "comment_app.custom_generate_captcha.generate_captcha"
+
 CSRF_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_SAMESITE = "Lax"
 
