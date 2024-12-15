@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "./api";
-import styles from "./Register.module.css"; // Подключаем стили
+import styles from "./Register.module.css"; // Connecting styles
 
 const Register = () => {
     const [username, setUsername] = useState("");

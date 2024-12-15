@@ -9,7 +9,7 @@ const Home = () => {
     return (
         <Box sx={{ flexGrow: 1, textAlign: "center", padding: 4, minHeight: "100vh" }}>
             <Grid container spacing={3} alignItems="center" justifyContent="center">
-                {/* Заголовок */}
+                {/* Headline */}
                 <Grid item xs={12}>
                     <Typography variant="h2" gutterBottom>
                         Welcome to CommentHub
@@ -19,7 +19,6 @@ const Home = () => {
                     </Typography>
                 </Grid>
 
-                {/* Привлекательное изображение */}
                 <Grid item xs={12} md={6}>
                     <img
                         src="http://localhost:8000/static/images/balloons-874837_1280.jpg"
@@ -28,7 +27,7 @@ const Home = () => {
                     />
                 </Grid>
 
-                {/* Логин и регистрация */}
+                {/* Login and registration */}
                 <Grid item xs={12} md={6}>
                     <Paper elevation={3} sx={{ padding: 4, borderRadius: 2 }}>
                         <Typography variant="h5" gutterBottom>
@@ -59,7 +58,7 @@ const Home = () => {
                     </Paper>
                 </Grid>
 
-                {/* CTA для прокрутки к комментариям */}
+                {/* CTA to scroll to comments */}
                 <Grid item xs={12}>
                     <Typography variant="body2" color="textSecondary" gutterBottom>
                         Already logged in? Explore and share your thoughts now!

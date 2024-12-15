@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
     const [prevPage, setPrevPage] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);  
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [loading, setLoading] = useState(true); // Новое состояние для загрузки
+    const [loading, setLoading] = useState(true); // New state to load
 
     useEffect(() => {
         const refreshToken = async () => {
@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
             }
         };
     
-        const interval = setInterval(refreshToken, 4 * 60 * 1000); // Обновляем каждые 4 минуты
+        const interval = setInterval(refreshToken, 4 * 60 * 1000); // We update every 4 minutes
         return () => clearInterval(interval);
     }, []);
     
@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
             } catch (error) {
                 setIsAuthenticated(false);
             } finally {
-                setLoading(false); // Завершаем загрузку
+                setLoading(false); // Finishing the download
             }
         };
 
@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }) => {
     
     useEffect(() => {
 
-             // Загрузка комментариев
+             // Loading comments
             const fetchComments = async (page,url = `/comments/`) => {
                 setLoading(true);
                 try {
@@ -87,7 +87,7 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
 
-                 // WebSocket для реального времени
+                 // WebSocket for real time
             const addReplyToTree = (comments, newReply) => {
                 return comments.map((comment) => {
                     if (comment.id === newReply.parent) {

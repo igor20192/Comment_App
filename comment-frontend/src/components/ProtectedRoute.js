@@ -5,12 +5,12 @@ import AuthContext from "./AuthContext";
 const ProtectedRoute = ({ children }) => {
     const { isAuthenticated, loading } = useContext(AuthContext);
 
-    // Показываем индикатор загрузки, пока проверка не завершена
+    // Show loading indicator until verification is complete
     if (loading) {
         return <div>Loading...</div>;
     }
 
-    // Если пользователь аутентифицирован, показываем контент
+    // If the user is authenticated, display the content
     return isAuthenticated ? children : <Navigate to="/login" />;
 };
 

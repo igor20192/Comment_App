@@ -1,11 +1,11 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL: "http://localhost:8000/api", // Замените на ваш адрес
-    withCredentials: true, // Отправка cookies, включая HttpOnly
+    baseURL: "http://localhost:8000/api", // Replace with your address
+    withCredentials: true, // Sending cookies, including HttpOnly
 });
 
-// Перехватчик для автоматического обновления токенов
+// Interceptor for automatic token refresh
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
@@ -14,16 +14,16 @@ api.interceptors.response.use(
         if (error.response && error.response.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
             try {
-                // Запрос на обновление токена
+                // Token Renewal Request
                 await axios.post(
                     "http://localhost:8000/api/token/refresh/",
                     {},
                     { withCredentials: true }
                 );
-                // Повторный запрос после обновления токена
+                // Re-request after token refresh
                 return api(originalRequest);
             } catch (refreshError) {
-                // Обработка ошибки обновления
+                // Handling update error
                 console.error("Failed to refresh token", refreshError);
                 return Promise.reject(refreshError);
             }

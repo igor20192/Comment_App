@@ -40,13 +40,13 @@ const CommentForm = (parentId = null) => {
         if (name === "image") {
             const file = files[0];
             if (file) {
-                // Проверка формата файла
+                // Checking the file format
                 const validFormats = ["image/jpeg", "image/png", "image/gif"];
                 if (!validFormats.includes(file.type)) {
                     setFileError("Изображение должно быть в формате JPG, PNG или GIF.");
                     return;
                 }
-                // Проверка размеров изображения
+                // Checking image dimensions
                 const img = new Image();
                 img.src = URL.createObjectURL(file);
                 img.onload = () => {
@@ -74,12 +74,12 @@ const CommentForm = (parentId = null) => {
         } else if (name === "file") {
             const file = files[0];
             if (file) {
-                // Проверка формата файла
+                // Checking the file format
                 if (file.type !== "text/plain") {
                     setFileError("Текстовый файл должен быть в формате TXT.");
                     return;
                 }
-                // Проверка размера файла
+                // Check file size
                 if (file.size > 100 * 1024) {
                     setFileError("Размер текстового файла не должен превышать 100 КБ.");
                     return;
@@ -101,17 +101,17 @@ const CommentForm = (parentId = null) => {
         const start = textarea.selectionStart;
         const end = textarea.selectionEnd;
 
-        // Получаем текст до и после выделенного
+        // We get the text before and after the selected one
         const before = formData.text.substring(0, start);
         const selected = formData.text.substring(start, end);
         const after = formData.text.substring(end);
 
-        // Оборачиваем выделенный текст в теги
+        // Wrap the selected text in tags
         const newText = `${before}[${tag}]${selected}[/${tag}]${after}`;
         setFormData({ ...formData, text: newText });
         setPreviewHTML(parseBBCode(newText)); 
 
-        // Возвращаем фокус и позицию курсора
+        // Return focus and cursor position
         setTimeout(() => {
             textarea.focus();
             textarea.setSelectionRange(start + tag.length + 2, end + tag.length + 2);

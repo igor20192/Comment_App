@@ -1,18 +1,18 @@
 import React, { useState, useEffect, useContext } from 'react';
-import DOMPurify from 'dompurify'; // Защита от XSS
-import styles from './CommentList.module.css'; // Подключение стилей
+import DOMPurify from 'dompurify'; // XSS protection
+import styles from './CommentList.module.css'; // Connecting styles
 import CommentForm from './CommentForm';
 import AuthContext from './AuthContext';
 
 const CommentList = () => {
-    const [expandedComment, setExpandedComment] = useState(null); // Состояние для раскрытого комментария
+    const [expandedComment, setExpandedComment] = useState(null); // State for expanded comment
     const [activeReplyForm, setActiveReplyForm] = useState(null);
     const [expandedReplies, setExpandedReplies] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const {logout, comments, currentPage, setCurrentPage, setSortField, setSortOrder, sortOrder, nextPage, prevPage, } = useContext(AuthContext);
 
     useEffect(() => {
-        setIsLoading(false); // Симулируем завершение загрузки
+        setIsLoading(false); // Simulating the completion of the download
     }, [comments]);
 
     const handleSort = (field) => {
@@ -75,7 +75,7 @@ const CommentList = () => {
                     </div>
                 )}
 
-                {/* Кнопка для отображения/скрытия ответов */}
+                {/* Button to show/hide answers */}
                 {comment.replies && comment.replies.length > 0 && (
                     <button
                         className={styles.button}
@@ -95,7 +95,7 @@ const CommentList = () => {
                         renderComments(comment.replies, depth + 1)}
                 </div>
 
-                {/* Кнопка "Reply" и форма для добавления ответа */}
+                {/* "Reply" button and form for adding a reply */}
                 <button
                     className={styles.replyButton}
                     onClick={() =>
@@ -111,7 +111,7 @@ const CommentList = () => {
 
     return (
         <div className={styles.container}>
-            {/* Кнопка выхода */}
+            {/* Exit button */}
             <div className={styles.logoutSection}>
                 <button className={styles.logoutButton} onClick={logout}>
                     Logout
@@ -120,14 +120,14 @@ const CommentList = () => {
 
             <h1>Comments</h1>
 
-            {/* Сортировка */}
+            {/* Sorting */}
             <div className={styles.sortButtons}>
                 <button onClick={() => handleSort("username")}>Sort by Username</button>
                 <button onClick={() => handleSort("email")}>Sort by Email</button>
                 <button onClick={() => handleSort("created_at")}>Sort by Date</button>
             </div>
 
-            {/* Список комментариев */}
+            {/* List of comments */}
             <div className={styles.commentList}>
                 {isLoading ? <div className={styles.loader}></div> : renderComments(comments)}
             </div>
