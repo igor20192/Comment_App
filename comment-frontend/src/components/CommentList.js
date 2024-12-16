@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import DOMPurify from 'dompurify'; // XSS protection
+import Modal from 'react-modal'; // Modal for image viewing
 import styles from './CommentList.module.css'; // Connecting styles
 import CommentForm from './CommentForm';
 import AuthContext from './AuthContext';
@@ -9,6 +10,7 @@ const CommentList = () => {
     const [activeReplyForm, setActiveReplyForm] = useState(null);
     const [expandedReplies, setExpandedReplies] = useState({});
     const [isLoading, setIsLoading] = useState(true);
+    const [modalImage, setModalImage] = useState(null); // State for modal image
     const {logout, comments, currentPage, setCurrentPage, setSortField, setSortOrder, sortOrder, nextPage, prevPage, } = useContext(AuthContext);
 
     useEffect(() => {
@@ -33,6 +35,14 @@ const CommentList = () => {
         } else if (direction === "prev" && prevPage) {
             setCurrentPage((prev) => prev - 1);
         }
+    };
+
+    const openModal = (imageUrl) => {
+        setModalImage(imageUrl);
+    };
+
+    const closeModal = () => {
+        setModalImage(null);
     };
 
     const renderComments = (comments, depth = 0) => {
@@ -64,7 +74,12 @@ const CommentList = () => {
 
                 {comment.image && (
                     <div className={styles.commentImage}>
-                        <img src={comment.image} alt="Attachment" className={styles.image} />
+                        <img
+                            src={comment.image}
+                            alt="Attachment"
+                            className={styles.image}
+                            onClick={() => openModal(comment.image)}
+                        />
                     </div>
                 )}
                 {comment.file && (
@@ -136,12 +151,25 @@ const CommentList = () => {
                 <button onClick={() => handlePageChange("prev")} disabled={!prevPage}>
                     Previous
                 </button>
-                    <span>Page {currentPage}</span>
+                <span>Page {currentPage}</span>
                 <button onClick={() => handlePageChange("next")} disabled={!nextPage}>
                     Next
                 </button>
             </div>
 
+            {/* Modal for viewing image */}
+            {modalImage && (
+                <Modal
+                    isOpen={true}
+                    onRequestClose={closeModal}
+                    contentLabel="Image Modal"
+                    className={styles.modal}
+                    overlayClassName={styles.overlay}
+                >
+                    <img src={modalImage} alt="Full View" className={styles.modalImage} />
+                    <button onClick={closeModal} className={styles.closeButton}>Close</button>
+                </Modal>
+            )}
         </div>
     );
 };
