@@ -127,19 +127,28 @@ const CommentList = () => {
     return (
         <div className={styles.container}>
             {/* Exit button */}
-            <div className={styles.logoutSection}>
+            <div className={styles.header}>
+                {/* Top */}
+                <h1 className={styles.title}>Comments</h1>
+
+                {/* Button exit */}
                 <button className={styles.logoutButton} onClick={logout}>
                     Logout
                 </button>
             </div>
 
-            <h1>Comments</h1>
-
             {/* Sorting */}
-            <div className={styles.sortButtons}>
-                <button onClick={() => handleSort("username")}>Sort by Username</button>
-                <button onClick={() => handleSort("email")}>Sort by Email</button>
-                <button onClick={() => handleSort("created_at")}>Sort by Date</button>
+            <div className={styles.sortSection}>
+                <span>Sort by:</span>
+                <button onClick={() => handleSort("username")} className={styles.sortButton}>
+                    Username
+                </button>
+                <button onClick={() => handleSort("email")} className={styles.sortButton}>
+                    Email
+                </button>
+                <button onClick={() => handleSort("created_at")} className={styles.sortButton}>
+                    Date
+                </button>
             </div>
 
             {/* List of comments */}
