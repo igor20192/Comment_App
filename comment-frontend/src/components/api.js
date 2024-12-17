@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL: "http://localhost:8000/api", // Replace with your address
+    baseURL: process.env.REACT_APP_API_BASE_URL, // Replace with your address
     withCredentials: true, // Sending cookies, including HttpOnly
 });
 
@@ -16,7 +16,7 @@ api.interceptors.response.use(
             try {
                 // Token Renewal Request
                 await axios.post(
-                    "http://localhost:8000/api/token/refresh/",
+                    `${process.env.REACT_APP_API_BASE_URL}/token/refresh/`,
                     {},
                     { withCredentials: true }
                 );

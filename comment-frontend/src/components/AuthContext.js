@@ -108,7 +108,7 @@ export const AuthProvider = ({ children }) => {
             });
         };
 
-            const ws = new WebSocket('ws://localhost:8000/ws/comments/');
+            const ws = new WebSocket(process.env.REACT_APP_BASE_WS);
             ws.onmessage = (event) => {
                 const newComment = JSON.parse(event.data);
                 console.log('New comment received:', newComment);

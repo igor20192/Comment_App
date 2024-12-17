@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Typography, Box, Grid, Paper } from "@mui/material";
-import api from "./api";
+
 
 const Home = () => {
     const navigate = useNavigate();
@@ -21,7 +21,7 @@ const Home = () => {
 
                 <Grid item xs={12} md={6}>
                     <img
-                        src="http://localhost:8000/static/images/balloons-874837_1280.jpg"
+                        src={`${process.env.REACT_APP_BASE_URL}/static/images/balloons-874837_1280.jpg`}
                         alt="Comments Illustration"
                         style={{ width: "100%", borderRadius: "8px" }}
                     />
