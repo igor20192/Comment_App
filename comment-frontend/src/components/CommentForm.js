@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import styles from "./CommentForm.module.css";
 import DOMPurify from "dompurify";
 import api from "./api";
@@ -17,12 +16,13 @@ const CommentForm = (parentId = null) => {
     const [captchaImage, setCaptchaImage] = useState("");
     const [captchaKey, setCaptchaKey] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState(""); 
     const [fileError, setFileError] = useState("");
     const [previewHTML, setPreviewHTML] = useState("");
 
     const fetchCaptcha = async () => {
         try {
-            const response = await axios.get("http://localhost:8000/api/captcha/");
+            const response = await api.get("/captcha/");
             setCaptchaImage(response.data.image);
             setCaptchaKey(response.data.key);
         } catch (error) {
@@ -134,6 +134,7 @@ const CommentForm = (parentId = null) => {
     
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setSuccessMessage("");
         const formDataToSend = new FormData();
         formDataToSend.append("username", formData.username);
         formDataToSend.append("email", formData.email);
@@ -167,6 +168,7 @@ const CommentForm = (parentId = null) => {
             });
             setErrorMessage("");
             setFileError("");
+            setSuccessMessage("Комментарий успешно отправлен.");
         } catch (error) {
             if (error.response && error.response.status === 400) {
                 const errors = error.response.data;
@@ -242,7 +244,7 @@ const CommentForm = (parentId = null) => {
                 className={styles.textarea}
             ></textarea>
             <div className={styles.captchaContainer}>
-                <img src={`http://localhost:8000${captchaImage}`} alt="CAPTCHA" className={styles.captchaImage} />
+                <img src={`${process.env.REACT_APP_BASE_URL}${captchaImage}`} alt="CAPTCHA" className={styles.captchaImage} />
                 <input
                     type="text"
                     name="captcha"
@@ -278,6 +280,7 @@ const CommentForm = (parentId = null) => {
                     className={styles.fileInput}
                 />
             </div>
+            {successMessage && <p className={styles.successMessage}>{successMessage}</p>}
             {errorMessage && <p className={styles.errorMessage}>{errorMessage}</p>}
             {fileError && <p className={styles.errorMessage}>{fileError}</p>}
             <button type="submit" className={styles.button}>Submit</button>

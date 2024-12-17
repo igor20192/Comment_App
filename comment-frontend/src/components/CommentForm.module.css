@@ -70,6 +70,14 @@
     border-radius: 5px;
 }
 
+.successMessage {
+    color: green; 
+    font-size: 16px; 
+    font-weight: bold; 
+    margin-top: 10px; 
+    text-align: center; 
+  }
+  
 
 /* Подписи для загрузки файлов */
 .fileLabel {
