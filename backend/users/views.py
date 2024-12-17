@@ -4,11 +4,11 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
-from rest_framework_simplejwt.exceptions import InvalidToken
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+from django.core.cache import cache
 from rest_framework import status
-from decouple import config
 import logging
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
@@ -207,52 +207,193 @@ class RegisterView(APIView):
 
 
 class LoginView(APIView):
+    """Handle user authentication and token generation."""
+
     permission_classes = [AllowAny]
 
     def post(self, request):
-        username = request.data.get("username")
-        password = request.data.get("password")
+        """
+        Process login requests and generate authentication tokens.
 
-        user = authenticate(username=username, password=password)
-        if not user:
-            return Response({"error": "Invalid credentials"}, status=401)
+        Args:
+            request: HTTP request object containing username and password
 
-        refresh = RefreshToken.for_user(user)
-        response = Response({"message": "Login successful"})
-        # Устанавливаем access_token в cookies
-        response.set_cookie(
-            key="access_token",
-            value=str(refresh.access_token),
-            httponly=True,
-            secure=config("SET_COOKIE_SECURE", default=False, cast=bool),
-            samesite="Lax",
-        )
-        # Устанавливаем refresh_token в cookies
-        response.set_cookie(
-            key="refresh_token",
-            value=str(refresh),
-            httponly=True,
-            secure=config("SET_COOKIE_SECURE", default=False, cast=bool),
-            samesite="Lax",
-        )
-        return response
+        Returns:
+            Response with authentication tokens in cookies
+        """
+        try:
+            username = request.data.get("username")
+            password = request.data.get("password")
+
+            # Validate input
+            if not username or not password:
+                return Response(
+                    {"error": "Username and password are required"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Rate limiting
+            ip_address = request.META.get(
+                "HTTP_X_FORWARDED_FOR", request.META.get("REMOTE_ADDR")
+            )
+            cache_key = f"login_attempts_{ip_address}"
+            login_attempts = cache.get(cache_key, 0)
+
+            if login_attempts >= 5:  # Max 5 attempts per 15 minutes
+                return Response(
+                    {"error": "Too many login attempts. Please try again later."},
+                    status=status.HTTP_429_TOO_MANY_REQUESTS,
+                )
+
+            # Authenticate user
+            user = authenticate(username=username, password=password)
+
+            if not user:
+                # Increment failed login attempts
+                cache.set(cache_key, login_attempts + 1, 900)  # 15 minutes
+
+                logger.warning(f"Failed login attempt for username: {username}")
+                return Response(
+                    {"error": "Invalid credentials"},
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
+
+            if not user.is_active:
+                return Response(
+                    {"error": "Account is disabled"}, status=status.HTTP_403_FORBIDDEN
+                )
+
+            # Generate tokens
+            refresh = RefreshToken.for_user(user)
+
+            # Clear failed login attempts on successful login
+            cache.delete(cache_key)
+
+            # Prepare response
+            response = Response(
+                {
+                    "message": "Login successful",
+                    "user": {
+                        "id": user.id,
+                        "username": user.username,
+                    },
+                }
+            )
+
+            # Cookie settings
+            cookie_settings = {
+                "httponly": True,
+                "secure": settings.SET_COOKIE_SECURE,
+                "samesite": "Lax",
+                "path": "/",
+            }
+
+            # Set access token cookie
+            response.set_cookie(
+                key="access_token",
+                value=str(refresh.access_token),
+                max_age=settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"].total_seconds(),
+                **cookie_settings,
+            )
+
+            # Set refresh token cookie
+            response.set_cookie(
+                key="refresh_token",
+                value=str(refresh),
+                max_age=settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"].total_seconds(),
+                **cookie_settings,
+            )
+
+            # Log successful login
+            logger.info(f"Successful login for user: {username}")
+
+            return response
+
+        except Exception as e:
+            logger.error(f"Login error: {str(e)}")
+            return Response(
+                {"error": "An error occurred during login"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class LogoutView(APIView):
+    """Handle user logout and token invalidation."""
+
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
+        """
+        Process logout requests and invalidate tokens.
+
+        Args:
+            request: HTTP request object containing tokens in cookies
+
+        Returns:
+            Response confirming logout status
+        """
         try:
+            # Get tokens from cookies
             refresh_token = request.COOKIES.get("refresh_token")
-            if refresh_token:
+            access_token = request.COOKIES.get("access_token")
+
+            if not refresh_token:
+                return Response(
+                    {"error": "No refresh token provided"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            try:
+                # Blacklist the refresh token
                 token = RefreshToken(refresh_token)
                 token.blacklist()
 
-            response = Response({"message": "Logout successful"}, status=200)
-            response.delete_cookie("access_token")
-            response.delete_cookie("refresh_token")
-            return response
-        except Exception as e:
-            logger.error(f"Logout error: {e}")
-            return Response(
-                {"error": "Failed to logout"},
-                status=status.HTTP_400_BAD_REQUEST,
+                # Log successful token blacklisting
+                logger.info(f"Token blacklisted for user: {request.user.username}")
+
+            except TokenError as e:
+                logger.warning(
+                    f"Invalid token during logout for user: {request.user.username}"
+                )
+                # Continue with logout even if token is invalid
+                pass
+
+            # Prepare response
+            response = Response(
+                {"message": "Logout successful"}, status=status.HTTP_200_OK
             )
+
+            # Delete both tokens
+            response.delete_cookie(
+                "access_token",
+                path="/",
+                domain=settings.SESSION_COOKIE_DOMAIN,
+            )
+            response.delete_cookie(
+                "refresh_token",
+                path="/",
+                domain=settings.SESSION_COOKIE_DOMAIN,
+            )
+
+            # Clear any session data if using sessions
+            if hasattr(request, "session"):
+                request.session.flush()
+
+            logger.info(f"Successful logout for user: {request.user.username}")
+            return response
+
+        except Exception as e:
+            logger.error(f"Logout error for user {request.user.username}: {str(e)}")
+            return Response(
+                {
+                    "error": "An error occurred during logout",
+                    "detail": str(e) if settings.DEBUG else "Please try again",
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+    def handle_no_permission(self):
+        """Handle unauthorized logout attempts."""
+        return Response(
+            {"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED
+        )
