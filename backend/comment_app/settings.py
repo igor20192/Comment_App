@@ -30,7 +30,6 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = config("DJANGO_ALLOWED_HOSTS", default="*").split()
 
-USE_HTTPS = config("USE_HTTPS", default=False, cast=bool)
 
 ACCESS_TOKEN_LIFETIME = timedelta(days=5)
 
@@ -106,14 +105,22 @@ CACHES = {
 
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "AUTH_HEADER_TYPES": ("Bearer",),
     "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
     "TOKEN_BLACKLIST_ENABLED": True,
 }
+
+# Cookie Settings
+SET_COOKIE_SECURE = config(
+    "SET_COOKIE_SECURE", default=False, cast=bool
+)  # Set to False in development
+USE_HTTPS = config("USE_HTTPS", default=False, cast=bool)
+SESSION_COOKIE_DOMAIN = config("SESSION_COOKIE_DOMAIN", default=None)
+
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 25,
@@ -123,6 +130,9 @@ REST_FRAMEWORK = {
     # "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
 }
 
+# CAPTCHA settings
+CAPTCHA_LENGTH = 6  # Length of CAPTCHA text
+CAPTCHA_TIMEOUT = 5  # CAPTCHA timeout in minutes
 CAPTCHA_CHALLENGE_FUNCT = "comment_app.custom_generate_captcha.generate_captcha"
 
 CSRF_COOKIE_SAMESITE = "Lax"
