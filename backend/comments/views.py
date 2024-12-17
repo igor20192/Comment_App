@@ -3,12 +3,13 @@ from django.conf import settings
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view
+from rest_framework import status
 from django.core.cache import cache
 from .models import Comment
 from .serializers import CommentSerializer
 from captcha.models import CaptchaStore
 from captcha.helpers import captcha_image_url
-from django.http import JsonResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter
 import logging
@@ -18,10 +19,51 @@ from django.utils.timezone import now
 logger = logging.getLogger(__name__)
 
 
+@api_view(["GET"])
 def get_captcha(request):
-    captcha_key = CaptchaStore.generate_key()
-    captcha_image = captcha_image_url(captcha_key)
-    return JsonResponse({"key": captcha_key, "image": captcha_image})
+    """
+    Generate a new CAPTCHA and return its key and image URL.
+
+    Returns:
+        Response object containing:
+        - key: The CAPTCHA hash key
+        - image: URL to the CAPTCHA image
+    """
+    try:
+        # Clean up expired captchas
+        CaptchaStore.remove_expired()
+
+        # Generate new CAPTCHA
+        captcha_key = CaptchaStore.generate_key()
+
+        # Get the image URL
+        captcha_image = captcha_image_url(captcha_key)
+
+        # Rate limiting check
+        client_ip = request.META.get(
+            "HTTP_X_FORWARDED_FOR", request.META.get("REMOTE_ADDR")
+        )
+        cache_key = f"captcha_rate_limit_{client_ip}"
+        request_count = cache.get(cache_key, 0)
+
+        if request_count > 10:  # Max 10 requests per minute
+            return Response(
+                {"error": "Too many CAPTCHA requests. Please try again later."},
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
+            )
+
+        # Update rate limiting counter
+        cache.set(cache_key, request_count + 1, 60)  # 60 seconds expiry
+
+        return Response(
+            {"key": captcha_key, "image": captcha_image}, status=status.HTTP_200_OK
+        )
+
+    except Exception as e:
+        return Response(
+            {"error": "Failed to generate CAPTCHA"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
 
 
 class CommentViewSet(ModelViewSet):
