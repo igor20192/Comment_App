@@ -1,0 +1,53 @@
+services:
+  db:
+    image: postgres:17rc1-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./backend/.env.db
+    ports:
+      - 5432:5432
+
+  redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
+
+  api:
+    build:
+      context: ./backend  # Путь к Dockerfile для backend
+      dockerfile: Dockerfile
+    command: bash -c "python manage.py makemigrations && \
+                      python manage.py migrate && \
+                      python manage.py collectstatic --noinput && \
+                      python run_uvicorn.py"
+    env_file:
+      - ./backend/.env  # Переменные окружения для backend
+    volumes:
+      - ./backend:/app  # Монтируем исходники backend
+      - ./backend/statisfiles/:/app/backend/statisfiles
+      - ./backend/media/:/app/backend/media
+      - ./backend/static/images:/app/backend/static/images
+    ports:
+      - 8000:8000
+    
+    depends_on:
+      - db
+      - redis
+
+  nginx: 
+        restart: unless-stopped
+        build:
+            context: .
+            dockerfile: ./comment-frontend/Dockerfile
+        ports:
+            - 80:80
+        volumes:
+            - ./backend/statisfiles/:/app/backend/statisfiles
+            - ./backend/media/:/app/backend/media
+            - ./backend/static/images:/app/backend/static/images
+        depends_on: 
+            - api
+
+volumes:
+  postgres_data:
