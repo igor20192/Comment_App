@@ -25,9 +25,9 @@ services:
       - ./backend/.env  # Переменные окружения для backend
     volumes:
       - ./backend:/app  # Монтируем исходники backend
-      - ./backend/staticfiles/:/app/backend/staticfiles
-      - ./backend/media/:/app/backend/media
-      - ./backend/static/images:/app/backend/static/images
+      - ./backend/staticfiles/:/app/staticfiles
+      - ./backend/media/:/app/media
+      - ./backend/static/images:/app/static/images
     ports:
       - 8000:8000
     
@@ -44,9 +44,9 @@ services:
             - 80:80
             - 443:443
         volumes:
-            - ./backend/staticfiles/:/app/backend/staticfiles
-            - ./backend/media/:/app/backend/media
-            - ./backend/static/images:/app/backend/static/images
+            - ./backend/staticfiles/:/app/staticfiles
+            - ./backend/media/:/app/media
+            - ./backend/static/images:/app/static/images
             - ./comment-frontend/nginx/certbot/conf:/etc/letsencrypt
             - ./comment-frontend/nginx/certbot/www:/var/www/certbot
         depends_on: 
