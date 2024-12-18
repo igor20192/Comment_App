@@ -4,7 +4,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
-      - .env.db
+      - ./backend/.env.db
     ports:
       - 5432:5432
 
@@ -12,6 +12,52 @@ services:
     image: redis:latest
     ports:
       - 6379:6379
+
+  api:
+    build:
+      context: ./backend  # Путь к Dockerfile для backend
+      dockerfile: Dockerfile
+    command: bash -c "python manage.py makemigrations && \
+                      python manage.py migrate && \
+                      python manage.py collectstatic --noinput && \
+                      python run_uvicorn.py"
+    env_file:
+      - ./backend/.env  # Переменные окружения для backend
+    volumes:
+      - ./backend:/app  # Монтируем исходники backend
+      - ./backend/staticfiles/:/app/backend/staticfiles
+      - ./backend/media/:/app/backend/media
+      - ./backend/static/images:/app/backend/static/images
+    ports:
+      - 8000:8000
+    
+    depends_on:
+      - db
+      - redis
+
+  nginx: 
+        restart: unless-stopped
+        build:
+            context: .
+            dockerfile: ./comment-frontend/Dockerfile
+        ports:
+            - 80:80
+        volumes:
+            - ./backend/staticfiles/:/app/backend/staticfiles
+            - ./backend/media/:/app/backend/media
+            - ./backend/static/images:/app/backend/static/images
+            - ./comment-frontend/nginx/certbot/conf:/etc/letsencrypt
+            - ./comment-frontend/nginx/certbot/www:/var/www/certbot
+        depends_on: 
+            - api
+  
+  certbot:
+        image: certbot/certbot
+        restart: unless-stopped
+        volumes:
+            - ./comment-frontend/nginx/certbot/conf:/etc/letsencrypt
+            - ./comment-frontend/nginx/certbot/www:/var/www/certbot
+        entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"       
 
 volumes:
   postgres_data:
