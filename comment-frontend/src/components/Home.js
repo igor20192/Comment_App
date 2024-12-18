@@ -21,7 +21,7 @@ const Home = () => {
 
                 <Grid item xs={12} md={6}>
                     <img
-                        src={`${process.env.REACT_APP_BASE_URL}/static/images/balloons-874837_1280.jpg`}
+                        src={`${process.env.REACT_APP_BASE_URL}/static_api/images/balloons-874837_1280.jpg`}
                         alt="Comments Illustration"
                         style={{ width: "100%", borderRadius: "8px" }}
                     />
