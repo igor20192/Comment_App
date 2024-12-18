@@ -45,7 +45,7 @@ class CustomTokenRefreshView(TokenRefreshView):
                     key="access_token",
                     value=access_token,
                     httponly=True,
-                    secure=settings.USE_HTTPS,
+                    secure=settings.SET_COOKIE_SECURE,
                     samesite="Lax",
                 )
 
@@ -54,7 +54,7 @@ class CustomTokenRefreshView(TokenRefreshView):
                     key="refresh_token",
                     value=new_refresh_token,
                     httponly=True,
-                    secure=settings.USE_HTTPS,
+                    secure=settings.SET_COOKIE_SECURE,
                     samesite="Lax",
                 )
 
