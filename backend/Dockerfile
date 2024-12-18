@@ -36,6 +36,15 @@ COPY . .
 
 # Add a non-root user
 RUN useradd -m appuser && \
-    chown -R appuser:appuser /app
+    mkdir -p /app/staticfiles && \
+    chown -R appuser:appuser /app && \
+    chmod -R 775 /app/staticfiles
+
+# Switch to non-root user
 USER appuser
+
+
+
+
+
 
