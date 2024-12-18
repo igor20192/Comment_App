@@ -42,6 +42,7 @@ services:
             dockerfile: ./comment-frontend/Dockerfile
         ports:
             - 80:80
+            - 443:443
         volumes:
             - ./backend/staticfiles/:/app/backend/staticfiles
             - ./backend/media/:/app/backend/media
