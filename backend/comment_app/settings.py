@@ -31,6 +31,13 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = config("DJANGO_ALLOWED_HOSTS", default="*").split()
 
 
+SECURE_HSTS_SECONDS = 10
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
 ACCESS_TOKEN_LIFETIME = timedelta(days=5)
 
 # Application definition
@@ -90,7 +97,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],  # for docker
+            "hosts": [("redis", 6379)],  # for docker
         },
     },
 }
@@ -98,7 +105,7 @@ CHANNEL_LAYERS = {
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379",
+        "LOCATION": "redis://redis",
         "TIMEOUT": 300,
     }
 }
@@ -118,7 +125,7 @@ SIMPLE_JWT = {
 SET_COOKIE_SECURE = config(
     "SET_COOKIE_SECURE", default=False, cast=bool
 )  # Set to False in development
-USE_HTTPS = config("USE_HTTPS", default=False, cast=bool)
+
 SESSION_COOKIE_DOMAIN = config("SESSION_COOKIE_DOMAIN", default=None)
 
 REST_FRAMEWORK = {
@@ -139,7 +146,7 @@ CSRF_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_SAMESITE = "Lax"
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [config("CORS_ALLOWED_ORIGINS"), "http://localhost:8000"]
+CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS").split()
 
 
 # Database
@@ -198,7 +205,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "static_api/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 MEDIA_URL = "media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
