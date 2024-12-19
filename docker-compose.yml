@@ -28,9 +28,9 @@ services:
       - ./backend/.env  # Environment variables for backend
     volumes:
       - ./backend:/app  # Mounting the backend sources
-      - ./backend/staticfiles/:/app/staticfiles
-      - ./backend/media/:/app/media
-      - ./backend/static/images:/app/static/images
+      - staticfiles_volume:/app/staticfiles
+      - media_volume:/app/media
+      - static_images_volume:/app/static/images
     ports:
       - 8000:8000
     
@@ -47,9 +47,9 @@ services:
             - 80:80
             - 443:443
         volumes:
-            - ./backend/staticfiles/:/app/staticfiles
-            - ./backend/media/:/app/media
-            - ./backend/static/images:/app/static/images
+            - staticfiles_volume:/app/staticfiles
+            - media_volume:/app/media
+            - static_images_volume:/app/static/images
             - ./comment-frontend/nginx/certbot/conf:/etc/letsencrypt
             - ./comment-frontend/nginx/certbot/www:/var/www/certbot
         depends_on: 
@@ -65,3 +65,6 @@ services:
 
 volumes:
   postgres_data:
+  staticfiles_volume:
+  media_volume:
+  static_images_volume:
