@@ -5,7 +5,7 @@ if ! [ -x "$(command -v docker-compose)" ]; then
   exit 1
 fi
 
-domains=( comments.pp.ua www. comments.pp.ua)
+domains=(comments.pp.ua www.comments.pp.ua)
 rsa_key_size=4096
 data_path="./comment-frontend/nginx/certbot"
 email="igor.udovenko2012@meta.ua" # Adding a valid address is strongly recommended
