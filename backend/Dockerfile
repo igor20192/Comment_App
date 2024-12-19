@@ -35,10 +35,10 @@ COPY --from=builder $VIRTUAL_ENV $VIRTUAL_ENV
 COPY . .
 
 # Add a non-root user
-RUN useradd -m appuser && \
-    mkdir -p /app/staticfiles && \
-    chown -R appuser:appuser /app/staticfiles && \
-    chmod -R g+w /app/staticfiles  
+# RUN useradd -m appuser && \
+#     mkdir -p /app/staticfiles && \
+#     chown -R appuser:appuser /app/staticfiles && \
+#     chmod -R g+w /app/staticfiles  
 
 # Switch to non-root user
 USER appuser
