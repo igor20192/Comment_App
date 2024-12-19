@@ -17,10 +17,13 @@ services:
     build:
       context: ./backend  # Path to Dockerfile for backend
       dockerfile: Dockerfile
-    command: bash -c "python manage.py makemigrations && \
-                      python manage.py migrate && \
-                      python manage.py collectstatic --noinput && \
-                      python run_uvicorn.py"
+    command: bash -c "
+                    mkdir -p /app/staticfiles /app/media /app/static/images &&
+                    python manage.py makemigrations && 
+                    python manage.py migrate && 
+                    python manage.py collectstatic --noinput && 
+                    python run_uvicorn.py"
+    user: appuser                
     env_file:
       - ./backend/.env  # Environment variables for backend
     volumes:
