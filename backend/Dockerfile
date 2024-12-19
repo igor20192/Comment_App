@@ -34,14 +34,16 @@ COPY --from=builder $VIRTUAL_ENV $VIRTUAL_ENV
 # Copy application code
 COPY . .
 
-# Add a non-root user
+# Add a non-root user and set up directories with proper permissions
 RUN useradd -m appuser && \
     mkdir -p /app/staticfiles /app/media /app/static/images && \
     chown -R appuser:appuser /app && \
-    chmod -R 755 /app 
+    chown -R appuser:appuser $VIRTUAL_ENV && \
+    chmod -R 755 /app
 
 # Switch to non-root user
 USER appuser
+
 
 
 
