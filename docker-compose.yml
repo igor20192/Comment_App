@@ -19,6 +19,10 @@ services:
       dockerfile: Dockerfile
     command: bash -c "python manage.py makemigrations && \
                       python manage.py migrate && \
+                      useradd -m appuser && \
+                      mkdir -p /app/staticfiles && \
+                      chown -R appuser:appuser /app/staticfiles && \
+                      chmod -R g+w /app/staticfiles
                       python manage.py collectstatic --noinput && \
                       python run_uvicorn.py"
     env_file:
