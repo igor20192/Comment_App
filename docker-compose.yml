@@ -52,6 +52,7 @@ services:
             - static_images_volume:/app/static/images
             - ./comment-frontend/nginx/certbot/conf:/etc/letsencrypt
             - ./comment-frontend/nginx/certbot/www:/var/www/certbot
+            - ./frontend/build:/usr/share/nginx/html
         depends_on: 
             - api
   
