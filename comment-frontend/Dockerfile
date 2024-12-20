@@ -28,7 +28,7 @@ RUN npm run build
 FROM nginx:1.27.3-alpine
 
 # Add nginx configuration
-COPY comment-frontend/nginx/production/nginx.conf /etc/nginx/conf.d/nginx.conf
+COPY comment-frontend/nginx/production/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Create necessary directories and set correct permissions
 RUN mkdir -p /var/cache/nginx/client_temp /var/log/nginx \
