@@ -53,6 +53,7 @@ services:
             - ./comment-frontend/nginx/certbot/conf:/etc/letsencrypt
             - ./comment-frontend/nginx/certbot/www:/var/www/certbot
             - ./frontend/build:/usr/share/nginx/html
+            - /etc/letsencrypt/options-ssl-nginx.conf:/etc/letsencrypt/options-ssl-nginx.conf
         depends_on: 
             - api
   
@@ -62,6 +63,7 @@ services:
         volumes:
             - ./comment-frontend/nginx/certbot/conf:/etc/letsencrypt
             - ./comment-frontend/nginx/certbot/www:/var/www/certbot
+            - /etc/letsencrypt/options-ssl-nginx.conf:/etc/letsencrypt/options-ssl-nginx.conf
         depends_on:
           - nginx      
 
