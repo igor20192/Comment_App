@@ -39,7 +39,7 @@ services:
         restart: unless-stopped
         build:
             context: .
-            dockerfile: ./comment-frontend/Dockerfile
+            dockerfile: ./comment-frontend/Dockerfile-dev
         ports:
             - 80:80
         volumes:
