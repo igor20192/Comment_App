@@ -24,6 +24,9 @@ COPY comment-frontend/ ./
 # Build application
 RUN npm run build
 
+#Checking the contents of the build directory
+RUN ls -l /app/frontend/build
+
 # Production stage
 FROM nginx:1.27.3-alpine
 
@@ -39,6 +42,9 @@ RUN mkdir -p /var/cache/nginx/client_temp /var/log/nginx \
 
 # Copy built assets from the builder
 COPY --from=build /app/frontend/build /usr/share/nginx/html
+
+# Check the contents of the html directory
+RUN ls -l /usr/share/nginx/html
 
 # Expose port
 EXPOSE 80
