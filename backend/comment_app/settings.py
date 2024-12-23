@@ -31,12 +31,12 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = config("DJANGO_ALLOWED_HOSTS", default="*").split()
 
 
-SECURE_HSTS_SECONDS = 10
-SECURE_SSL_REDIRECT = True
+# SECURE_HSTS_SECONDS = 10
+# SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+# SECURE_HSTS_PRELOAD = True
 
 ACCESS_TOKEN_LIFETIME = timedelta(days=5)
 
@@ -207,6 +207,7 @@ USE_TZ = True
 
 STATIC_URL = "static_api/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 MEDIA_URL = "media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
