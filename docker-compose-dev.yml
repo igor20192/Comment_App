@@ -25,9 +25,9 @@ services:
       - ./backend/.env  # Переменные окружения для backend
     volumes:
       - ./backend:/app  # Монтируем исходники backend
-      - ./backend/statisfiles/:/app/backend/statisfiles
-      - ./backend/media/:/app/backend/media
-      - ./backend/static/images:/app/backend/static/images
+      - ./backend/staticfiles/:/app/staticfiles
+      - ./backend/media/:/app/media
+      - ./backend/static/images:/app/static/images
     ports:
       - 8000:8000
     
@@ -43,9 +43,9 @@ services:
         ports:
             - 80:80
         volumes:
-            - ./backend/statisfiles/:/app/backend/statisfiles
-            - ./backend/media/:/app/backend/media
-            - ./backend/static/images:/app/backend/static/images
+            - ./backend/staticfiles/:/app/staticfiles
+            - ./backend/media/:/app/media
+            - ./backend/static/images:/app/static/images
         depends_on: 
             - api
 
