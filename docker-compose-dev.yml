@@ -16,7 +16,7 @@ services:
   api:
     build:
       context: ./backend  # Путь к Dockerfile для backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-dev
     command: bash -c "python manage.py makemigrations && \
                       python manage.py migrate && \
                       python manage.py collectstatic --noinput && \
