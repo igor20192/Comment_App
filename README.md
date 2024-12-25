@@ -89,16 +89,16 @@ services:
 
   api:
     build:
-      context: ./backend  # Путь к Dockerfile для backend
+      context: ./backend  # Path to Dockerfile for backend
       dockerfile: Dockerfile
     command: bash -c "python manage.py makemigrations && \
                       python manage.py migrate && \
                       python manage.py collectstatic --noinput && \
                       python run_uvicorn.py"
     env_file:
-      - ./backend/.env  # Переменные окружения для backend
+      - ./backend/.env  # Environment variables for backend
     volumes:
-      - ./backend:/app  # Монтируем исходники backend
+      - ./backend:/app  # Mounting the backend sources
       - ./backend/staticfiles/:/app/staticfiles
       - ./backend/media/:/app/media
       - ./backend/static/images:/app/static/images
