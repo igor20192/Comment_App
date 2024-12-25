@@ -3,7 +3,7 @@
 This README provides a step-by-step guide for setting up and running the Comments project using Docker. The project consists of a Django backend and a React frontend. Ensure you have Docker and Docker Compose installed on your machine before proceeding.
 
 ## Project Structure
-
+```bash
 comments-project/
 ├── backend/
 │   ├── .env
@@ -16,6 +16,7 @@ comments-project/
 |   |── Dockerfile
 ├── docker-compose.yml
 └── README.md
+```
 
 ## Prerequisites
 
@@ -57,6 +58,8 @@ POSTGRES_DB=db_comment
 ```
 
 **Comment-Frontend** .env
+
+Create a file named .env inside the comment-frontend/ directory with the following conte
 
 ```bash
 REACT_APP_API_BASE_URL=http://localhost/api
